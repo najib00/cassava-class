@@ -2,22 +2,43 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>TF JS example</title>
+    <title>Tensorflow Cassava Disease Image Classification</title>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@2.0.0"></script>
 <style>
 #image {
-	height: 200px;
+	width: 300px;
 }
+	.bold {
+		font-weight: bold;
+	}
 
 </style>
 </head>
 <body>
-	<img id="image"></img><br/>
-	<h3 id ="result"></h3>
 	<input type="file" id="uploadbutton"></file>
+	<h3 id ="result"></h3>
+	<div>
+	<img style="float: left;" id="image"></img>
+	<div style="float: left;">
+		<ul>
+			<li>Healthy: <span id="healthy"></span></li>
+			<li>CBB: <span id="cbb"></span></li>
+			<li>CBSD: <span id="cbsd"></span></li>
+			<li>CGM: <span id="cgm"></span></li>
+			<li>CMD: <span id="cmd"></span></li>
+		</ul>
+	</div>
+	</div>
 
 	<script>
-let labels = ["cbb", "cbsd", "cgm", "cmd", "Healthy"]
+let labels = ["CBB", "CBSD", "CGM", "CMD", "Healthy"]
+let labelElement = [
+	document.getElementById("cbb"),
+	document.getElementById("cbsd"),
+	document.getElementById("cgm"),
+	document.getElementById("cmd"),
+	document.getElementById("healthy"),
+]
 let resultLabel = document.getElementById("result")
 let uploadButton = document.getElementById("uploadbutton")
 let image = document.getElementById("image")
@@ -33,9 +54,10 @@ let predict = async function () {
 	console.log("Image resized")
 
 	let prediction = await tfmodel.predict(tensorResized.expandDims())
-	let result = await prediction.argMax(1).array()
-	console.log(result)
-	resultLabel.innerHTML = "Result : " + labels[result[0]]
+	let resultArray = prediction.arraySync()[0]
+	let result = prediction.argMax(1).arraySync()
+	resultArray.forEach(function (v, i) { labelElement[i].innerHTML = v })
+	resultLabel.innerHTML = "Disease: " + labels[result[0]]
 }
 uploadButton.addEventListener("change", function (e) {
 	if (uploadButton.files && uploadButton.files[0]) {
