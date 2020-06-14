@@ -24,7 +24,7 @@ let image = document.getElementById("image")
 let tfmodel = false
 let predict = async function () {
 	if (!tfmodel) {
-		tfmodel = await tf.loadLayersModel("/model/keras_tfjs/model.json")
+		tfmodel = await tf.loadLayersModel("model/keras_tfjs/model.json")
 		console.log("Model Loaded")
 		tfmodel.summary()
 	}
