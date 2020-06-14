@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Tensorflow Cassava Disease Image Classification</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@2.0.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"> </script>
 <style>
 #image {
 	width: 300px;
@@ -43,6 +43,12 @@ let resultLabel = document.getElementById("result")
 let uploadButton = document.getElementById("uploadbutton")
 let image = document.getElementById("image")
 let tfmodel = false
+let updateValues = (val) => {
+	if (!Array.isArray(val)) {
+		val = [0,0,0,0,0]
+	}
+	val.forEach(function (v, i) { if (labelElement[i]) labelElement[i].innerHTML = v })
+}
 let predict = async function () {
 	if (!tfmodel) {
 		tfmodel = await tf.loadLayersModel("model/keras_tfjs/model.json")
@@ -54,14 +60,14 @@ let predict = async function () {
 	console.log("Image resized")
 
 	let prediction = await tfmodel.predict(tensorResized.expandDims())
-	let resultArray = prediction.arraySync()[0]
+	updateValues(prediction.arraySync()[0])
 	let result = prediction.argMax(1).arraySync()
-	resultArray.forEach(function (v, i) { labelElement[i].innerHTML = v })
 	resultLabel.innerHTML = "Disease: " + labels[result[0]]
 }
 uploadButton.addEventListener("change", function (e) {
 	if (uploadButton.files && uploadButton.files[0]) {
 		resultLabel.innerHTML = ""
+		updateValues()
 		let reader = new FileReader()
 		reader.onload = function (e) {
 			image.src = e.target.result;
