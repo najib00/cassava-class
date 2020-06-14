@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TF JS example</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@2.0.0"></script>
+<style>
+#image {
+	height: 200px;
+}
+
+</style>
+</head>
+<body>
+	<img id="image"></img><br/>
+	<h3 id ="result"></h3>
+	<input type="file" id="uploadbutton"></file>
+
+	<script>
+let labels = ["cbb", "cbsd", "cgm", "cmd", "Healthy"]
+let resultLabel = document.getElementById("result")
+let uploadButton = document.getElementById("uploadbutton")
+let image = document.getElementById("image")
+let tfmodel = false
+let predict = async function () {
+	if (!tfmodel) {
+		tfmodel = await tf.loadLayersModel("/model/keras_tfjs/model.json")
+		console.log("Model Loaded")
+		tfmodel.summary()
+	}
+	let imageTensor = tf.browser.fromPixels(image)
+	let tensorResized = tf.image.resizeBilinear(imageTensor, [224, 224])
+	console.log("Image resized")
+
+	let prediction = await tfmodel.predict(tensorResized.expandDims())
+	let result = await prediction.argMax(1).array()
+	console.log(result)
+	resultLabel.innerHTML = "Result : " + labels[result[0]]
+}
+uploadButton.addEventListener("change", function (e) {
+	if (uploadButton.files && uploadButton.files[0]) {
+		resultLabel.innerHTML = ""
+		let reader = new FileReader()
+		reader.onload = function (e) {
+			image.src = e.target.result;
+			predict()
+		}
+		reader.readAsDataURL(uploadButton.files[0])
+	}
+})
+	</script>
+</body>
+</html>
