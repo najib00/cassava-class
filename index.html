@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <title>Tensorflow Cassava Disease Image Classification</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"> </script>
+	<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"> </script>
+	<script src = "http://www.myersdaily.org/joseph/javascript/md5.js">
+	</script>
 <style>
 #image {
 	width: 300px;
@@ -50,16 +52,14 @@ let updateValues = (val) => {
 	val.forEach(function (v, i) { if (labelElement[i]) labelElement[i].innerHTML = v })
 }
 let predict = async function () {
-	if (!tfmodel) {
-		tfmodel = await tf.loadLayersModel("model/keras_tfjs/model.json")
-		console.log("Model Loaded")
-		tfmodel.summary()
-	}
+	tfmodel = tfmodel || await tf.loadLayersModel("model/keras_tfjs/model.json")
 	let imageTensor = tf.browser.fromPixels(image)
-	let tensorResized = tf.image.resizeBilinear(imageTensor, [224, 224])
-	console.log("Image resized")
+	console.log(md5(image.src))
+	console.log("Image Size" + imageTensor.shape)
+	let tensorResized = tf.image.resizeNearestNeighbor(imageTensor, [224, 224]).expandDims()
+	console.log("Image resized " + tensorResized.shape)
 
-	let prediction = await tfmodel.predict(tensorResized.expandDims())
+	let prediction = await tfmodel.predict(tensorResized)
 	updateValues(prediction.arraySync()[0])
 	let result = prediction.argMax(1).arraySync()
 	resultLabel.innerHTML = "Disease: " + labels[result[0]]
