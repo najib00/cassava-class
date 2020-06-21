@@ -10,52 +10,56 @@
     <link href="https://cdn.jsdelivr.net/npm/animate.css@^4.0.0/animate.min.css" rel="stylesheet" type="text/css">
     <link href="https://cdn.jsdelivr.net/npm/quasar@1.12.6/dist/quasar.min.css" rel="stylesheet" type="text/css">
 	<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"> </script>
+	<style>
+		#image:hover {
+			opacity: 0.8;
+			filter:alpha(opacity=80); 
+		}
+	</style>
   </head>
 
   <body>
-    <div id="q-app">
-        <div class="col full-height">
-            <q-tabs v-model="tab" class="text-teal">
-                <q-tab v-for="(model, index) in models" :name="model.name" :label="model.label" @click="loadModel(index)"></q-tab>
-            </q-tabs>
-    
-            <div class="row">
-                <div class="col-5">
-                    <q-tab-panels v-model="tab" animated transition-prev="jump-up" transition-next="jump-up">
-                        <q-tab-panel v-for="model in models" :name="model.name">
-                            <div class="text-h4 q-mb-md">{{ model.label }}</div>
-                            <pre style="font-size: 7pt;">{{ model.summary }}</pre>
-                        </q-tab-panel>
-                    </q-tab-panels>
-                </div>
-                <div class="col justify-between">
-                    <div style="height: 550px;overflow: hidden;" class="q-py-sm">
-                        <img ref="image" class="full-height" :src="imageData"></img>
-                        <q-inner-loading :showing="predicting">
-                            <q-spinner-gears size="50px" color="primary" />
-                          </q-inner-loading>
-                    </div>
-                    <q-tabs class="row-2" v-model="prediction">
-                        <q-tab 
-                            v-for="(text, label) in labels" 
-                            :name="label"
-                            :label="label"
-                            :icon="label == prediction ? 'check' : 'close'"
-                        ></q-tab>
-                    </q-tabs>
-                    <q-tab-panels class="row-1" v-model="prediction">
-                        <q-tab-panel v-for="(text, label) in labels" :name="label">
-                            <p>{{label}} Probability: {{ labelProbability[label] }}</label></p>
-                            <p>{{ text }}</p>
-                        </q-tab-panel>
-                    </q-tab-panels>
-                </div>
-            </div>
-        </div>
-
+	<div id="q-app">
+		<div class="col full-height">
+			<q-tabs v-model="tab" class="text-teal">
+				<q-tab v-for="(model, index) in models" :name="model.name" :label="model.label" @click="loadModel(index)">
+				</q-tab>
+			</q-tabs>
+	
+			<div class="row">
+				<div class="col-5">
+					<q-tab-panels v-model="tab" animated transition-prev="jump-up" transition-next="jump-up">
+						<q-tab-panel v-for="model in models" :name="model.name">
+							<div class="text-h4 q-mb-md">{{ model.label }}</div>
+							<pre style="font-size: 7pt;">{{ model.summary }}</pre>
+						</q-tab-panel>
+					</q-tab-panels>
+				</div>
+				<div class="col justify-between">
+					<div style="height: 550px;overflow: hidden;" class="q-py-sm">
+						<q-inner-loading :showing="predicting">
+							<q-spinner-gears size="50px" color="primary" />
+						</q-inner-loading>
+						<img ref="image" id="image" class="full-height" :src="imageData" @click="selectImage"></img>
+					</div>
+					<q-tabs class="row-2" v-model="predictionTab">
+						<q-tab v-for="(text, label) in labels" :name="label" :label="label"
+							:icon="label == prediction ? 'check' : 'close'"></q-tab>
+					</q-tabs>
+					<q-tab-panels class="row-1" v-model="predictionTab">
+						<q-tab-panel v-for="(text, label) in labels" :name="label">
+							<p>{{label}} Probability: {{ labelProbability[label] }}</label></p>
+							<p>{{ text }}</p>
+						</q-tab-panel>
+					</q-tab-panels>
+				</div>
+			</div>
+			<input ref="imageSelector" type="file" style="visibility:hidden" @change="imageSelected"/>
+		</div>
+	</div>
     <!-- Add the following at the end of your body tag -->
     <script src="https://cdn.jsdelivr.net/npm/vue@^2.0.0/dist/vue.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/quasar@1.12.6/dist/quasar.umd.modern.min.js"></script>
-    <script src="index.js"></script>
+	<script src="index.js"></script>
   </body>
 </html> 

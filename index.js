@@ -2,6 +2,7 @@ new Vue({
     el: '#q-app',
     data: function () {
         return {
+            predictionTab: "",
             predicting: false,
             tab: "overfitted",
             selected_model: 0,
@@ -48,23 +49,23 @@ new Vue({
                     this.model_objects[model_name].summary(null, null, (line) => {
                         this.models[index].summary += "\n" + line
                     })
-                    if (this.imageData != '') {
-                        this.predict()
-                    }
+                    this.predict()
                 })
             } else {
-                if (this.imageData != '') {
-                    this.predict()
-                }
+                this.predict()
             }
         },
         resetPrediction () {
+            this.predictionTab = ""
             this.prediction = ""
             this.labelIndex.forEach((v) => {
-                this.labelProbability[v] = ''
+                this.labelProbability[v] = ""
             })
         },
         predict () {
+            if (this.imageData == '') {
+                return
+            }
             this.predicting = true
             this.resetPrediction();
             let model = this.model_objects[this.models[this.selected_model].name]
@@ -84,9 +85,24 @@ new Vue({
                     }
                     this.labelProbability[label] = (v*100).toFixed(2) + '%'
                 })
+                this.predictionTab = labelMax
                 this.prediction = labelMax
                 this.predicting = false
             })
+        },
+        selectImage () {
+            this.$refs.imageSelector.click();
+        },
+        imageSelected () {
+            if (this.$refs.imageSelector.files && this.$refs.imageSelector.files[0]) {
+                let reader = new FileReader()
+                let self = this
+                reader.onload = function (e) {
+                    self.imageData = e.target.result;
+                    self.predict()
+                }
+                reader.readAsDataURL(this.$refs.imageSelector.files[0])
+            }
         }
     },
     mounted () {
