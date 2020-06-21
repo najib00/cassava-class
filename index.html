@@ -1,81 +1,61 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Tensorflow Cassava Disease Image Classification</title>
+<html>
+  <!--
+    WARNING! Make sure that you match all Quasar related
+    tags to the same version! (Below it's "@1.12.6")
+  -->
+
+  <head>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900|Material+Icons" rel="stylesheet" type="text/css">
+    <link href="https://cdn.jsdelivr.net/npm/animate.css@^4.0.0/animate.min.css" rel="stylesheet" type="text/css">
+    <link href="https://cdn.jsdelivr.net/npm/quasar@1.12.6/dist/quasar.min.css" rel="stylesheet" type="text/css">
 	<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"> </script>
-	<script src = "http://www.myersdaily.org/joseph/javascript/md5.js">
-	</script>
-<style>
-#image {
-	width: 300px;
-}
-	.bold {
-		font-weight: bold;
-	}
+  </head>
 
-</style>
-</head>
-<body>
-	<input type="file" id="uploadbutton"></file>
-	<h3 id ="result"></h3>
-	<div>
-	<img style="float: left;" id="image"></img>
-	<div style="float: left;">
-		<ul>
-			<li>Healthy: <span id="healthy"></span></li>
-			<li>CBB: <span id="cbb"></span></li>
-			<li>CBSD: <span id="cbsd"></span></li>
-			<li>CGM: <span id="cgm"></span></li>
-			<li>CMD: <span id="cmd"></span></li>
-		</ul>
-	</div>
-	</div>
+  <body>
+    <div id="q-app">
+        <div class="col full-height">
+            <q-tabs v-model="tab" class="text-teal">
+                <q-tab v-for="(model, index) in models" :name="model.name" :label="model.label" @click="loadModel(index)"></q-tab>
+            </q-tabs>
+    
+            <div class="row">
+                <div class="col-5">
+                    <q-tab-panels v-model="tab" animated transition-prev="jump-up" transition-next="jump-up">
+                        <q-tab-panel v-for="model in models" :name="model.name">
+                            <div class="text-h4 q-mb-md">{{ model.label }}</div>
+                            <pre style="font-size: 7pt;">{{ model.summary }}</pre>
+                        </q-tab-panel>
+                    </q-tab-panels>
+                </div>
+                <div class="col justify-between">
+                    <div style="height: 550px;overflow: hidden;" class="q-py-sm">
+                        <img ref="image" class="full-height" :src="imageData"></img>
+                        <q-inner-loading :showing="predicting">
+                            <q-spinner-gears size="50px" color="primary" />
+                          </q-inner-loading>
+                    </div>
+                    <q-tabs class="row-2" v-model="prediction">
+                        <q-tab 
+                            v-for="(text, label) in labels" 
+                            :name="label"
+                            :label="label"
+                            :icon="label == prediction ? 'check' : 'close'"
+                        ></q-tab>
+                    </q-tabs>
+                    <q-tab-panels class="row-1" v-model="prediction">
+                        <q-tab-panel v-for="(text, label) in labels" :name="label">
+                            <p>{{label}} Probability: {{ labelProbability[label] }}</label></p>
+                            <p>{{ text }}</p>
+                        </q-tab-panel>
+                    </q-tab-panels>
+                </div>
+            </div>
+        </div>
 
-	<script>
-let labels = ["CBB", "CBSD", "CGM", "CMD", "Healthy"]
-let labelElement = [
-	document.getElementById("cbb"),
-	document.getElementById("cbsd"),
-	document.getElementById("cgm"),
-	document.getElementById("cmd"),
-	document.getElementById("healthy"),
-]
-let resultLabel = document.getElementById("result")
-let uploadButton = document.getElementById("uploadbutton")
-let image = document.getElementById("image")
-let tfmodel = false
-let updateValues = (val) => {
-	if (!Array.isArray(val)) {
-		val = [0,0,0,0,0]
-	}
-	val.forEach(function (v, i) { if (labelElement[i]) labelElement[i].innerHTML = v })
-}
-let predict = async function () {
-	tfmodel = tfmodel || await tf.loadLayersModel("model/keras_tfjs/model.json")
-	let imageTensor = tf.browser.fromPixels(image)
-	console.log(md5(image.src))
-	console.log("Image Size" + imageTensor.shape)
-	let tensorResized = tf.image.resizeNearestNeighbor(imageTensor, [224, 224]).expandDims()
-	console.log("Image resized " + tensorResized.shape)
-
-	let prediction = await tfmodel.predict(tensorResized)
-	updateValues(prediction.arraySync()[0])
-	let result = prediction.argMax(1).arraySync()
-	resultLabel.innerHTML = "Disease: " + labels[result[0]]
-}
-uploadButton.addEventListener("change", function (e) {
-	if (uploadButton.files && uploadButton.files[0]) {
-		resultLabel.innerHTML = ""
-		updateValues()
-		let reader = new FileReader()
-		reader.onload = function (e) {
-			image.src = e.target.result;
-			predict()
-		}
-		reader.readAsDataURL(uploadButton.files[0])
-	}
-})
-	</script>
-</body>
-</html>
+    <!-- Add the following at the end of your body tag -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@^2.0.0/dist/vue.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/quasar@1.12.6/dist/quasar.umd.modern.min.js"></script>
+    <script src="/index.js"></script>
+  </body>
+</html> 
