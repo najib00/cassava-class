@@ -31,7 +31,7 @@
 					<q-tab-panels v-model="tab" animated transition-prev="jump-up" transition-next="jump-up">
 						<q-tab-panel v-for="model in models" :name="model.name">
 							<div class="text-h4 q-mb-md">{{ model.label }}</div>
-							<a :if="model.notebook" :href="notebookLink(model)">Notebook Link</a>
+							<a v-if="model.notebook" :href="notebookLink(model)">Notebook Link</a>
 							<pre style="font-size: 7pt;">{{ model.summary }}</pre>
 						</q-tab-panel>
 					</q-tab-panels>
